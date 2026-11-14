@@ -1,0 +1,849 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>特命ミッション：佐渡逆転経済作戦</title>
+<style>
+:root{
+  --bg:#0B1B2B;
+  --bg2:#0F2438;
+  --panel:#153050;
+  --panel-line: rgba(201,162,75,0.25);
+  --gold:#C9A24B;
+  --gold-light:#E7CE8E;
+  --toki:#E8879B;
+  --rice:#93A85E;
+  --cream:#F3ECD9;
+  --danger:#E4603F;
+  --good:#8FC98F;
+  --font-mincho: "Hiragino Mincho ProN","Yu Mincho","YuMincho","HGS明朝E",serif;
+  --font-gothic: "Hiragino Kaku Gothic ProN","Yu Gothic Medium","YuGothic","Meiryo",sans-serif;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:
+    radial-gradient(ellipse at 20% -10%, #1a3a58 0%, transparent 55%),
+    radial-gradient(ellipse at 90% 110%, #10233a 0%, transparent 60%),
+    var(--bg);
+  color:var(--cream);
+  font-family:var(--font-gothic);
+  min-height:100vh;
+  overflow-x:hidden;
+}
+.app{max-width:1180px;margin:0 auto;padding:20px 20px 60px;}
+
+/* ---------- 共通部品 ---------- */
+.brass-frame{
+  background:linear-gradient(180deg,#183656,#122a45);
+  border:1px solid var(--panel-line);
+  border-radius:10px;
+  box-shadow:0 0 0 1px rgba(0,0,0,0.35) inset, 0 8px 24px rgba(0,0,0,0.35);
+  position:relative;
+}
+.brass-frame::before{
+  content:"";
+  position:absolute;inset:4px;
+  border:1px solid rgba(201,162,75,0.14);
+  border-radius:7px;
+  pointer-events:none;
+}
+.eyebrow{
+  font-size:12px;letter-spacing:.22em;color:var(--gold-light);
+  text-transform:uppercase;font-weight:600;
+}
+h1,h2,h3{font-family:var(--font-mincho);font-weight:700;margin:0;color:var(--cream);}
+.btn{
+  font-family:var(--font-gothic);
+  background:linear-gradient(180deg,var(--gold-light),var(--gold));
+  color:#26160a;font-weight:700;font-size:15px;
+  border:none;border-radius:8px;padding:12px 22px;cursor:pointer;
+  box-shadow:0 3px 0 #7a5f2a, 0 6px 14px rgba(0,0,0,.35);
+  transition:transform .08s ease;
+}
+.btn:hover{transform:translateY(-1px);}
+.btn:active{transform:translateY(2px);box-shadow:0 1px 0 #7a5f2a;}
+.btn:disabled{opacity:.35;cursor:not-allowed;transform:none;box-shadow:none;}
+.btn.secondary{
+  background:transparent;color:var(--gold-light);
+  border:1px solid var(--gold);box-shadow:none;font-weight:600;
+}
+.btn.small{padding:6px 12px;font-size:13px;border-radius:6px;}
+
+/* ---------- イントロ ---------- */
+#screen-intro{padding:34px 30px 40px;}
+.intro-badge{
+  display:inline-block;font-size:12px;letter-spacing:.18em;
+  color:var(--toki);border:1px solid var(--toki);border-radius:999px;
+  padding:4px 12px;margin-bottom:14px;
+}
+.intro-title{font-size:clamp(28px,4.4vw,46px);line-height:1.25;margin:6px 0 10px;}
+.intro-title .accent{color:var(--gold-light);}
+.intro-sub{color:#BFD3E6;font-size:15px;line-height:1.9;max-width:760px;margin-bottom:22px;}
+.briefing{
+  display:flex;gap:20px;background:rgba(0,0,0,.18);border-radius:10px;
+  padding:18px 20px;margin:18px 0 26px;border-left:3px solid var(--toki);
+}
+.briefing .avatar{
+  width:56px;height:56px;flex:none;border-radius:50%;
+  background:radial-gradient(circle at 35% 30%, #ffd9e2, var(--toki));
+  display:flex;align-items:center;justify-content:center;font-size:24px;
+  box-shadow:0 0 0 3px rgba(232,135,155,.2);
+}
+.briefing p{margin:0 0 8px;line-height:1.85;font-size:14.5px;color:#E7EEF5;}
+.briefing p:last-child{margin-bottom:0;}
+.briefing .role{font-family:var(--font-mincho);color:var(--gold-light);font-weight:700;margin-bottom:6px;font-size:15px;}
+.rules-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:26px;}
+.rule-card{padding:16px 16px 14px;border-radius:9px;}
+.rule-card .num{font-family:var(--font-mincho);color:var(--gold);font-size:13px;margin-bottom:6px;letter-spacing:.1em;}
+.rule-card h3{font-size:15.5px;margin-bottom:6px;}
+.rule-card p{font-size:13px;color:#B9CBDD;line-height:1.7;margin:0;}
+@media (max-width:820px){.rules-grid{grid-template-columns:1fr;}}
+
+/* ---------- ゲーム画面 ---------- */
+#screen-game{display:none;}
+.topbar{
+  display:flex;flex-wrap:wrap;gap:10px;justify-content:space-between;align-items:center;
+  padding:14px 18px;margin-bottom:16px;
+}
+.turn-badge{font-family:var(--font-mincho);font-size:18px;color:var(--gold-light);}
+.turn-badge span{color:#93A6BA;font-size:13px;font-family:var(--font-gothic);margin-left:6px;}
+.stats{display:flex;gap:22px;flex-wrap:wrap;}
+.stat{text-align:right;}
+.stat .label{font-size:11px;color:#8FA3B8;letter-spacing:.08em;}
+.stat .value{font-family:var(--font-mincho);font-size:20px;color:var(--cream);}
+.stat .value.up::after{content:" ▲";color:var(--good);font-size:12px;}
+.stat .value.down::after{content:" ▼";color:var(--danger);font-size:12px;}
+
+.charts-row{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-bottom:16px;}
+@media (max-width:760px){.charts-row{grid-template-columns:1fr;}}
+.chart-box{padding:14px 16px 10px;}
+.chart-box h3{font-size:13px;color:#BFD3E6;font-family:var(--font-gothic);font-weight:600;letter-spacing:.05em;margin-bottom:6px;}
+canvas{display:block;width:100%;}
+
+.budget-bar{
+  display:flex;align-items:center;justify-content:space-between;gap:14px;
+  padding:12px 18px;margin-bottom:14px;
+}
+.budget-bar .label{font-size:13px;color:#BFD3E6;}
+.budget-bar .amt{font-family:var(--font-mincho);font-size:22px;color:var(--gold-light);}
+.budget-track{flex:1;height:8px;border-radius:4px;background:rgba(255,255,255,.08);overflow:hidden;margin:0 12px;}
+.budget-fill{height:100%;background:linear-gradient(90deg,var(--rice),var(--gold-light));transition:width .25s ease;}
+
+.cards-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-bottom:18px;}
+@media (max-width:980px){.cards-grid{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:520px){.cards-grid{grid-template-columns:1fr;}}
+.card{padding:14px 14px 12px;display:flex;flex-direction:column;gap:8px;}
+.card .head{display:flex;align-items:center;gap:8px;}
+.card .icon{font-size:20px;}
+.card .name{font-family:var(--font-mincho);font-size:14.5px;color:var(--cream);}
+.card .desc{font-size:12px;color:#9FB3C7;line-height:1.6;min-height:44px;}
+.level-dots{display:flex;gap:4px;margin:2px 0;}
+.level-dots i{width:9px;height:9px;border-radius:2px;background:rgba(255,255,255,.12);display:inline-block;}
+.level-dots i.on{background:var(--gold-light);box-shadow:0 0 6px rgba(231,206,142,.7);}
+.card .invest-row{display:flex;align-items:center;justify-content:space-between;margin-top:auto;}
+.card .invest-row .units{font-size:12px;color:#BFD3E6;}
+.card .invest-row .units b{color:var(--gold-light);font-size:15px;}
+.mini-btn{
+  width:28px;height:28px;border-radius:6px;border:1px solid var(--panel-line);
+  background:rgba(255,255,255,.04);color:var(--cream);font-size:16px;cursor:pointer;line-height:1;
+}
+.mini-btn:hover{background:rgba(231,206,142,.15);}
+.mini-btn:disabled{opacity:.25;cursor:not-allowed;}
+.mini-btns{display:flex;gap:6px;align-items:center;}
+.card.risk .name::after{content:" ⚠";color:var(--danger);font-size:11px;}
+
+.confirm-row{display:flex;justify-content:center;margin:18px 0 6px;}
+
+/* イベント/結果モーダル */
+.modal-backdrop{
+  position:fixed;inset:0;background:rgba(4,10,18,.72);
+  display:none;align-items:center;justify-content:center;z-index:50;padding:20px;
+}
+.modal-backdrop.show{display:flex;}
+.modal{
+  max-width:520px;width:100%;padding:26px 26px 22px;
+  animation:pop .25s ease;
+}
+@keyframes pop{from{transform:scale(.94);opacity:0;}to{transform:scale(1);opacity:1;}}
+.modal .tag{font-size:12px;letter-spacing:.15em;color:var(--toki);margin-bottom:8px;}
+.modal h2{font-size:20px;margin-bottom:10px;}
+.modal .narrative{font-size:14px;line-height:1.85;color:#DDE8F0;margin-bottom:14px;}
+.delta-list{display:flex;flex-wrap:wrap;gap:8px;margin-bottom:18px;}
+.delta-chip{
+  font-size:12.5px;padding:5px 10px;border-radius:999px;
+  background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.1);
+}
+.delta-chip.pos{color:var(--good);border-color:rgba(143,201,143,.4);}
+.delta-chip.neg{color:var(--danger);border-color:rgba(228,96,63,.4);}
+
+/* ---------- エンド画面 ---------- */
+#screen-end{display:none;padding:30px 30px 40px;}
+.end-title{font-size:clamp(24px,3.6vw,34px);margin-bottom:6px;}
+.end-sub{color:#BFD3E6;font-size:14px;margin-bottom:20px;}
+.end-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:18px;margin-bottom:22px;}
+@media (max-width:820px){.end-grid{grid-template-columns:1fr;}}
+.end-stats{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:14px;}
+.end-stat{padding:12px 14px;border-radius:8px;background:rgba(255,255,255,.03);}
+.end-stat .label{font-size:11px;color:#8FA3B8;}
+.end-stat .value{font-family:var(--font-mincho);font-size:19px;}
+.highlight-list{list-style:none;margin:10px 0 0;padding:0;}
+.highlight-list li{
+  display:flex;justify-content:space-between;padding:8px 0;
+  border-bottom:1px dashed rgba(255,255,255,.08);font-size:13.5px;
+}
+.highlight-list li b{color:var(--gold-light);}
+
+.comment-section{padding:20px 22px;margin-top:6px;}
+.comment-section h3{font-size:16px;margin-bottom:4px;}
+.comment-section .note{font-size:12px;color:#8FA3B8;margin-bottom:14px;}
+.comment-form{display:flex;flex-direction:column;gap:8px;margin-bottom:18px;}
+.comment-form input, .comment-form textarea{
+  font-family:var(--font-gothic);background:rgba(0,0,0,.22);
+  border:1px solid var(--panel-line);border-radius:6px;color:var(--cream);
+  padding:9px 11px;font-size:13.5px;resize:vertical;
+}
+.comment-form textarea{min-height:64px;}
+.comment-form-actions{display:flex;justify-content:flex-end;gap:8px;}
+.comment-list{display:flex;flex-direction:column;gap:8px;max-height:220px;overflow-y:auto;padding-right:4px;}
+.comment-item{background:rgba(255,255,255,.03);border-radius:7px;padding:10px 12px;}
+.comment-item .meta{font-size:11px;color:var(--gold-light);margin-bottom:3px;}
+.comment-item .body{font-size:13px;color:#DCE7F0;line-height:1.6;white-space:pre-wrap;}
+.comment-empty{font-size:12.5px;color:#7C90A5;padding:6px 0;}
+.replay-row{display:flex;gap:10px;justify-content:center;margin-top:24px;}
+.status-line{font-size:12px;color:#7C90A5;margin-top:6px;}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <!-- ============ イントロ画面 ============ -->
+  <section id="screen-intro" class="brass-frame">
+    <span class="intro-badge">CLASSIFIED MISSION FILE</span>
+    <h1 class="intro-title">特命ミッション<br><span class="accent">佐渡逆転経済作戦</span></h1>
+    <p class="intro-sub">
+      人口流出と地域経済縮小が続く佐渡市。市長と新潟県知事は、手段を択ばぬ辣腕マーケター
+      「ブレード株式会社 小森」に、島の人口・観光・収支を立て直す全権を与えた。
+      あなたが小森となり、限られた予算をどの施策に配るかを8ターンにわたって選択する。
+    </p>
+
+    <div class="briefing">
+      <div class="avatar">🧭</div>
+      <div>
+        <div class="role">小森からのブリーフィング</div>
+        <p>「佐渡は人が減り続けている島だ。でも、金・朱鷺・海・港——武器は揃ってる。
+        後は配分のセンスだけだよ。」</p>
+        <p>「毎ターン、予算を施策に振り分けてもらう。効果は次のターンにすぐ跳ね返る。
+        気候変動やSNSバズりみたいな“想定外”も普通に起きるから、そのつもりで。」</p>
+      </div>
+    </div>
+
+    <div class="rules-grid">
+      <div class="rule-card brass-frame">
+        <div class="num">RULE 01</div>
+        <h3>予算配分</h3>
+        <p>人口・観光客・産業規模に応じて毎ターン予算が決まる。8種の施策に自由に投資しよう。</p>
+      </div>
+      <div class="rule-card brass-frame">
+        <div class="num">RULE 02</div>
+        <h3>連鎖する結果</h3>
+        <p>投資は人口・観光客・収支に反映され、季節変動や突発イベントの影響も受ける。</p>
+      </div>
+      <div class="rule-card brass-frame">
+        <div class="num">RULE 03</div>
+        <h3>8ターンで決着</h3>
+        <p>2年分・全8ターンの経営を終えたら、佐渡がたどった経済の道筋を振り返る。</p>
+      </div>
+    </div>
+
+    <button class="btn" onclick="startGame()">▶ ミッション開始（所要 約4分）</button>
+  </section>
+
+  <!-- ============ ゲーム画面 ============ -->
+  <section id="screen-game">
+    <div class="topbar brass-frame">
+      <div class="turn-badge" id="turnBadge">TURN 1 / 8 <span>春・1年目</span></div>
+      <div class="stats">
+        <div class="stat"><div class="label">人口</div><div class="value" id="statPop">50,000 人</div></div>
+        <div class="stat"><div class="label">観光客(季)</div><div class="value" id="statTourists">400 千人</div></div>
+        <div class="stat"><div class="label">累計収支</div><div class="value" id="statTreasury">0 万円</div></div>
+      </div>
+    </div>
+
+    <div class="charts-row">
+      <div class="chart-box brass-frame">
+        <h3>人口推移</h3>
+        <canvas id="chartPop" width="560" height="150"></canvas>
+      </div>
+      <div class="chart-box brass-frame">
+        <h3>地域経済収支の推移（累計）</h3>
+        <canvas id="chartFin" width="560" height="150"></canvas>
+      </div>
+    </div>
+
+    <div class="budget-bar brass-frame">
+      <div class="label">今ターンの予算</div>
+      <div class="budget-track"><div class="budget-fill" id="budgetFill" style="width:100%"></div></div>
+      <div class="amt"><span id="budgetLeft">0</span> / <span id="budgetTotal">0</span> 万円</div>
+    </div>
+
+    <div class="cards-grid" id="cardsGrid"></div>
+
+    <div class="confirm-row">
+      <button class="btn" id="confirmBtn" onclick="resolveTurn()">この配分で決定 → 次のターンへ</button>
+    </div>
+  </section>
+
+  <!-- ============ 結果モーダル ============ -->
+  <div class="modal-backdrop" id="modalBackdrop">
+    <div class="modal brass-frame" id="modalBox"></div>
+  </div>
+
+  <!-- ============ エンド画面 ============ -->
+  <section id="screen-end">
+    <div class="eyebrow">MISSION REPORT</div>
+    <h1 class="end-title" id="endTitle">作戦完了</h1>
+    <p class="end-sub" id="endSub"></p>
+
+    <div class="end-grid">
+      <div class="chart-box brass-frame">
+        <h3>最終ターンまでの人口・収支の軌跡</h3>
+        <canvas id="chartEnd" width="560" height="220"></canvas>
+        <div class="end-stats">
+          <div class="end-stat"><div class="label">初期人口 → 最終人口</div><div class="value" id="endPop"></div></div>
+          <div class="end-stat"><div class="label">最終累計収支</div><div class="value" id="endTreasury"></div></div>
+        </div>
+      </div>
+      <div class="chart-box brass-frame">
+        <h3>小森の采配ハイライト（投資額 上位）</h3>
+        <ul class="highlight-list" id="highlightList"></ul>
+      </div>
+    </div>
+
+    <div class="comment-section brass-frame">
+      <h3>参加者の感想ボード</h3>
+      <p class="note">この作戦をプレイした感想やコメントを残してください。会場内の他の参加者にも表示されます。</p>
+      <div class="comment-form">
+        <input type="text" id="commentName" maxlength="20" placeholder="お名前 / ニックネーム（任意）">
+        <textarea id="commentBody" maxlength="300" placeholder="感想・意見をどうぞ（例：施策のバランスが面白かった／もっと難しくても良い、等）"></textarea>
+        <div class="comment-form-actions">
+          <button class="btn small" onclick="submitComment()">感想を投稿</button>
+        </div>
+        <div class="status-line" id="commentStatus"></div>
+      </div>
+      <div class="comment-list" id="commentList"></div>
+    </div>
+
+    <div class="replay-row">
+      <button class="btn secondary" onclick="location.reload()">🔄 もう一度プレイする</button>
+    </div>
+  </section>
+
+</div>
+
+<script>
+/* ==========================================================
+   佐渡逆転経済作戦 — ゲームロジック
+   ========================================================== */
+
+const MAX_TURNS = 8;
+const SEASONS = ["春","夏","秋","冬"];
+const SEASON_MULT = {"春":1.0, "夏":1.25, "秋":1.05, "冬":0.8};
+
+const INITIATIVES = [
+  {id:"brand", icon:"🍊", name:"おけさ柿ブランディング/EC拡大",
+   desc:"特産品の高付加価値化とEC販路拡大で安定収入を底上げ。",
+   unitCost:500, risk:false,
+   effect:{population:10, tourists:5, income:400, primary:2, secondary:0, tertiary:0}},
+  {id:"liver", icon:"📹", name:"会いに行けるライバー特区",
+   desc:"YouTube/TikTokライバーを誘致移住。観光客と話題性を稼ぐ。",
+   unitCost:600, risk:true,
+   effect:{population:40, tourists:30, income:100, primary:0, secondary:0, tertiary:2}},
+  {id:"subculture", icon:"🎨", name:"佐渡限定サブカルイベント",
+   desc:"島オンサイト限定のアニメ・漫画クリエイターイベントで一過性の集客爆発。",
+   unitCost:500, risk:true,
+   effect:{population:0, tourists:70, income:700, primary:0, secondary:0, tertiary:1}},
+  {id:"workation", icon:"💻", name:"ワーケーション特区",
+   desc:"リモートワーカー向け環境整備で定住・準定住人口を底上げ。",
+   unitCost:500, risk:false,
+   effect:{population:50, tourists:5, income:150, primary:0, secondary:0, tertiary:1}},
+  {id:"migrant", icon:"🏠", name:"移住者厚遇・企業支援",
+   desc:"移住支援金と企業誘致で人口を直接押し上げるが行政コストが継続的にかさむ。",
+   unitCost:700, risk:false,
+   effect:{population:70, tourists:0, income:-150, primary:0, secondary:1, tertiary:0}},
+  {id:"infra", icon:"🚁", name:"交通インフラ段階拡充",
+   desc:"船便増発・高速化からドローンタクシーまで、島へのアクセス障壁を下げる。",
+   unitCost:800, risk:false,
+   effect:{population:15, tourists:20, income:-100, primary:0, secondary:1, tertiary:1}},
+  {id:"trade", icon:"⚓", name:"海外交易ハブ港湾整備",
+   desc:"海外との交易窓口を整え、日本でありながら国際色豊かな村運営を実現。",
+   unitCost:700, risk:false,
+   effect:{population:20, tourists:10, income:900, primary:0, secondary:2, tertiary:1}},
+  {id:"mining", icon:"⛏️", name:"レアメタル/メタンハイドレート採掘",
+   desc:"稀少資源の採掘拠点で莫大な収入。ただし環境リスクを高める諸刃の一手。",
+   unitCost:900, risk:true,
+   effect:{population:-15, tourists:0, income:1400, primary:0, secondary:4, tertiary:0}},
+];
+
+const EVENTS = [
+  {id:"typhoon", name:"突発的な気候変動リスク（大型台風）", weight:14,
+   apply:(s)=>({tourists:-100, income:-1000, population:0}),
+   text:"季節外れの大型台風が佐渡を直撃。フェリー欠航が相次ぎ、観光客が大きく落ち込んだ。"},
+  {id:"world", name:"世界情勢の変化（資源需要の高騰）", weight:10,
+   apply:(s)=> s.cumInvest.trade>0 || s.cumInvest.mining>0
+      ? {income:1500, tourists:0, population:0}
+      : {income:-500, tourists:0, population:0},
+   text:"世界情勢の急変で資源・交易の相場が動いた。国際窓口を持つ島は追い風を、持たない島は逆風を受けた。"},
+  {id:"snsbuzz", name:"SNSでの突発バズり", weight:12,
+   apply:(s)=> s.cumInvest.liver>0
+      ? {tourists:200, population:30, income:300}
+      : {tourists:60, population:0, income:100},
+   text:"佐渡の風景がSNSで突如バズった。ライバー特区が育っていた島では効果が倍増した。"},
+  {id:"boom", name:"一過性の観光ブーム到来", weight:10,
+   apply:(s)=>({tourists:150, income:1000, population:0}),
+   text:"メディア特集をきっかけに、一過性の観光ブームが到来。港も宿も賑わいを見せた。"},
+  {id:"disease", name:"原因不明の感染症発生", weight:8,
+   apply:(s)=>({population:-100, tourists:-200, income:-800}),
+   text:"原因不明の感染症が報告され、来島を控える動きが広がった。医療体制の整備が急務に。"},
+  {id:"goldheritage", name:"佐渡金山、世界的な注目再燃", weight:10,
+   apply:(s)=>({tourists:250, income:1200, population:0}),
+   text:"佐渡金山の史跡が世界的に再注目され、歴史観光を目当てにした来島者が急増した。"},
+  {id:"fishery", name:"不漁・一次産業の不振", weight:8,
+   apply:(s)=>({income:-500, population:0, tourists:0}),
+   text:"海水温の変化で不漁が続き、一次産業の収益が落ち込んだ。"},
+  {id:"media", name:"海外メディアの特集", weight:8,
+   apply:(s)=> s.cumInvest.trade>0
+      ? {tourists:220, population:60, income:400}
+      : {tourists:120, population:20, income:100},
+   text:"海外メディアが佐渡のライフスタイルを特集。国際色ある受け入れ体制がある島ほど反響が大きかった。"},
+  {id:"none", name:"平穏なターン", weight:20,
+   apply:(s)=>({population:0, tourists:0, income:0}),
+   text:"今ターンは目立った出来事もなく、施策の効果がそのまま数字に表れた。"},
+];
+
+let state;
+
+function initState(){
+  state = {
+    turn:1,
+    season:0, // index into SEASONS
+    year:1,
+    population:50000,
+    initialPopulation:50000,
+    tourists:400,
+    treasury:0,
+    industries:{primary:40, secondary:20, tertiary:45},
+    cumInvest:{}, // total 万円 invested per initiative, all-time
+    thisTurnUnits:{}, // units chosen this turn (reset each turn)
+    history:[{turn:0, population:50000, treasury:0, tourists:400}],
+    lastEventText:null,
+  };
+  INITIATIVES.forEach(it=>{ state.cumInvest[it.id]=0; state.thisTurnUnits[it.id]=0; });
+}
+
+function levelOf(id){
+  const cum = state.cumInvest[id];
+  return Math.min(3, Math.floor(cum/3000));
+}
+
+function currentBudget(){
+  const ind = state.industries;
+  const b = 1200 + state.population*0.03 + state.tourists*2 + (ind.primary+ind.secondary+ind.tertiary)*10;
+  return Math.round(b/50)*50;
+}
+
+function spentSoFar(){
+  let sum=0;
+  INITIATIVES.forEach(it=> sum += state.thisTurnUnits[it.id]*it.unitCost);
+  return sum;
+}
+
+/* ---------------- 画面遷移 ---------------- */
+function startGame(){
+  initState();
+  document.getElementById('screen-intro').style.display='none';
+  document.getElementById('screen-game').style.display='block';
+  renderAll();
+}
+
+/* ---------------- レンダリング ---------------- */
+function renderAll(){
+  document.getElementById('turnBadge').innerHTML =
+    `TURN ${state.turn} / ${MAX_TURNS} <span>${SEASONS[state.season]}・${state.year}年目</span>`;
+  document.getElementById('statPop').textContent = Math.round(state.population).toLocaleString()+' 人';
+  document.getElementById('statTourists').textContent = Math.round(state.tourists).toLocaleString()+' 千人';
+  document.getElementById('statTreasury').textContent = Math.round(state.treasury).toLocaleString()+' 万円';
+
+  renderBudget();
+  renderCards();
+  drawLineChart('chartPop', state.history.map(h=>h.population), '#8FC98F', v=>Math.round(v).toLocaleString()+'人');
+  drawLineChart('chartFin', state.history.map(h=>h.treasury), '#E7CE8E', v=>Math.round(v).toLocaleString()+'万円');
+}
+
+function renderBudget(){
+  const total = currentBudget();
+  const spent = spentSoFar();
+  const left = total - spent;
+  document.getElementById('budgetTotal').textContent = total.toLocaleString();
+  document.getElementById('budgetLeft').textContent = left.toLocaleString();
+  document.getElementById('budgetFill').style.width = Math.max(0, (left/total*100)).toFixed(1)+'%';
+  document.getElementById('confirmBtn').disabled = false;
+}
+
+function renderCards(){
+  const grid = document.getElementById('cardsGrid');
+  grid.innerHTML='';
+  const total = currentBudget();
+  const spent = spentSoFar();
+  const left = total - spent;
+
+  INITIATIVES.forEach(it=>{
+    const lvl = levelOf(it.id);
+    const units = state.thisTurnUnits[it.id];
+    const canAdd = left >= it.unitCost && units < 6;
+    const canSub = units > 0;
+
+    const card = document.createElement('div');
+    card.className = 'card brass-frame' + (it.risk ? ' risk' : '');
+    card.innerHTML = `
+      <div class="head"><span class="icon">${it.icon}</span><span class="name">${it.name}</span></div>
+      <div class="desc">${it.desc}</div>
+      <div class="level-dots">${[0,1,2,3].map(i=>`<i class="${i<=lvl && lvl>0 ? 'on':''}"></i>`).join('')}</div>
+      <div class="invest-row">
+        <div class="units">今ターン投資 <b>${units}</b> 単位<br><span style="opacity:.7">(${it.unitCost.toLocaleString()}万円/単位)</span></div>
+        <div class="mini-btns">
+          <button class="mini-btn" ${canSub?'':'disabled'} onclick="adjustUnit('${it.id}',-1)">−</button>
+          <button class="mini-btn" ${canAdd?'':'disabled'} onclick="adjustUnit('${it.id}',1)">＋</button>
+        </div>
+      </div>
+    `;
+    grid.appendChild(card);
+  });
+}
+
+function adjustUnit(id, delta){
+  const it = INITIATIVES.find(i=>i.id===id);
+  const total = currentBudget();
+  const spent = spentSoFar();
+  const left = total - spent;
+  const cur = state.thisTurnUnits[id];
+  if(delta>0){
+    if(left >= it.unitCost && cur < 6) state.thisTurnUnits[id] = cur+1;
+  } else {
+    if(cur>0) state.thisTurnUnits[id] = cur-1;
+  }
+  renderBudget();
+  renderCards();
+}
+
+/* ---------------- ターン解決 ---------------- */
+function pickEvent(){
+  const totalWeight = EVENTS.reduce((s,e)=>s+e.weight,0);
+  let r = Math.random()*totalWeight;
+  for(const e of EVENTS){
+    if(r < e.weight) return e;
+    r -= e.weight;
+  }
+  return EVENTS[EVENTS.length-1];
+}
+
+function resolveTurn(){
+  document.getElementById('confirmBtn').disabled = true;
+
+  // 1) 施策効果を集計
+  let dPop=0, dTour=0, dIncome=0, dPrimary=0, dSecondary=0, dTertiary=0;
+  const investedThisTurn = [];
+  INITIATIVES.forEach(it=>{
+    const u = state.thisTurnUnits[it.id];
+    if(u>0){
+      dPop += it.effect.population*u;
+      dTour += it.effect.tourists*u;
+      dIncome += it.effect.income*u;
+      dPrimary += it.effect.primary*u;
+      dSecondary += it.effect.secondary*u;
+      dTertiary += it.effect.tertiary*u;
+      state.cumInvest[it.id] += u*it.unitCost;
+      investedThisTurn.push(`${it.icon} ${it.name} +${u}`);
+    }
+  });
+
+  // 2) ランダムイベント
+  const ev = pickEvent();
+  const evDelta = ev.apply(state);
+
+  // 3) 累積投資レベルによるパッシブ補正
+  const totalLevels = INITIATIVES.reduce((s,it)=> s+levelOf(it.id), 0);
+  const passivePop = totalLevels*12;
+
+  // 4) 季節・自然減衰
+  const nextSeasonIdx = (state.season+1)%4;
+  const seasonMult = SEASON_MULT[SEASONS[nextSeasonIdx]];
+  const baselinePopDecay = -80;
+  const baselineTourDecay = -10;
+
+  // 5) 各値更新
+  const newPopulation = Math.max(0, state.population + dPop + (evDelta.population||0) + passivePop + baselinePopDecay);
+  let newTourists = (state.tourists + dTour + (evDelta.tourists||0) + baselineTourDecay);
+  newTourists = Math.max(0, newTourists*seasonMult/SEASON_MULT[SEASONS[state.season]]);
+  const industries = {
+    primary: Math.max(0, state.industries.primary + dPrimary),
+    secondary: Math.max(0, state.industries.secondary + dSecondary),
+    tertiary: Math.max(0, state.industries.tertiary + dTertiary),
+  };
+  const indIncome = (industries.primary+industries.secondary+industries.tertiary)*15;
+  const adminCost = state.population*0.4;
+  const turnIncome = dIncome + (evDelta.income||0) + indIncome - adminCost;
+  const newTreasury = state.treasury + turnIncome;
+
+  // 差分表示用
+  const deltas = [
+    {label:'人口', v: Math.round(newPopulation - state.population)},
+    {label:'観光客', v: Math.round(newTourists - state.tourists)},
+    {label:'ターン収支', v: Math.round(turnIncome)},
+  ];
+
+  // 6) 状態を確定
+  state.population = newPopulation;
+  state.tourists = newTourists;
+  state.industries = industries;
+  state.treasury = newTreasury;
+  state.season = nextSeasonIdx;
+  if(nextSeasonIdx===0) state.year += 1;
+  state.history.push({turn:state.turn, population:newPopulation, treasury:newTreasury, tourists:newTourists});
+
+  // ターン用投資をリセット
+  INITIATIVES.forEach(it=> state.thisTurnUnits[it.id]=0);
+
+  showResultModal(ev, deltas, investedThisTurn);
+}
+
+function showResultModal(ev, deltas, investedThisTurn){
+  const backdrop = document.getElementById('modalBackdrop');
+  const box = document.getElementById('modalBox');
+  const investedText = investedThisTurn.length
+    ? `今ターンの投資：${investedThisTurn.join('／')}`
+    : `今ターンは投資を見送った。`;
+
+  box.innerHTML = `
+    <div class="tag">TURN ${state.turn} RESULT — ${ev.name}</div>
+    <h2>${ev.name}</h2>
+    <p class="narrative">${ev.text}<br><br>${investedText}</p>
+    <div class="delta-list">
+      ${deltas.map(d=>`<span class="delta-chip ${d.v>=0?'pos':'neg'}">${d.label} ${d.v>=0?'+':''}${d.v.toLocaleString()}</span>`).join('')}
+    </div>
+    <button class="btn" onclick="closeModalAndAdvance()">次へ ▶</button>
+  `;
+  backdrop.classList.add('show');
+}
+
+function closeModalAndAdvance(){
+  document.getElementById('modalBackdrop').classList.remove('show');
+  state.turn += 1;
+  if(state.turn > MAX_TURNS){
+    showEndScreen();
+  } else {
+    renderAll();
+  }
+}
+
+/* ---------------- チャート描画（簡易canvas） ---------------- */
+function drawLineChart(canvasId, values, color, fmt){
+  const canvas = document.getElementById(canvasId);
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  // 背景グリッド（レーダースクリーン風）
+  ctx.strokeStyle = 'rgba(201,162,75,0.12)';
+  ctx.lineWidth = 1;
+  for(let i=1;i<4;i++){
+    const y = h/4*i;
+    ctx.beginPath(); ctx.moveTo(0,y); ctx.lineTo(w,y); ctx.stroke();
+  }
+
+  if(values.length<2){
+    ctx.fillStyle='rgba(255,255,255,.3)';
+    ctx.font='12px sans-serif';
+    ctx.fillText('データ蓄積中…', 10, h/2);
+    return;
+  }
+
+  const min = Math.min(...values), max = Math.max(...values);
+  const range = (max-min) || 1;
+  const padY = 14;
+  const stepX = w/(values.length-1);
+
+  ctx.beginPath();
+  values.forEach((v,i)=>{
+    const x = i*stepX;
+    const y = h - padY - ((v-min)/range)*(h-padY*2);
+    if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+  });
+  ctx.strokeStyle = color;
+  ctx.lineWidth = 2.4;
+  ctx.shadowColor = color;
+  ctx.shadowBlur = 8;
+  ctx.stroke();
+  ctx.shadowBlur = 0;
+
+  // 点
+  values.forEach((v,i)=>{
+    const x = i*stepX;
+    const y = h - padY - ((v-min)/range)*(h-padY*2);
+    ctx.beginPath();
+    ctx.arc(x,y,2.6,0,Math.PI*2);
+    ctx.fillStyle = color;
+    ctx.fill();
+  });
+
+  // 最新値ラベル
+  const lastV = values[values.length-1];
+  ctx.fillStyle = '#F3ECD9';
+  ctx.font = '11px sans-serif';
+  ctx.fillText(fmt(lastV), w-90, 14);
+}
+
+/* ---------------- エンド画面 ---------------- */
+function showEndScreen(){
+  document.getElementById('screen-game').style.display='none';
+  document.getElementById('screen-end').style.display='block';
+
+  const initPop = state.initialPopulation;
+  const finalPop = state.population;
+  const growth = (finalPop-initPop)/initPop;
+
+  let title, sub;
+  if(growth>0.15){
+    title='V字回復！佐渡ルネッサンス達成';
+    sub='人口流出のスパイラルを断ち切り、島全体が成長軌道に乗った。小森の采配は歴史に残る「逆転劇」として語られるだろう。';
+  } else if(growth>0){
+    title='回復の兆し、成長軌道へ';
+    sub='人口・経済ともに緩やかな上向きを取り戻した。悪循環は止まり、次の一手次第でさらなる飛躍が見込める。';
+  } else if(growth>-0.05){
+    title='現状維持、悪循環の入口で踏みとどまる';
+    sub='大きな後退は防いだが、決定的な反転には至らなかった。もう一段踏み込んだ投資判断が求められる局面だった。';
+  } else {
+    title='人口流出、止まらず';
+    sub='短期的な収益は得られたものの、島全体の人口減少に歯止めはかからなかった。次の作戦では長期的な定住策を厚くしたい。';
+  }
+  document.getElementById('endTitle').textContent = title;
+  document.getElementById('endSub').textContent = sub;
+
+  document.getElementById('endPop').textContent =
+    `${Math.round(initPop).toLocaleString()} 人 → ${Math.round(finalPop).toLocaleString()} 人`;
+  document.getElementById('endTreasury').textContent =
+    `${Math.round(state.treasury).toLocaleString()} 万円`;
+
+  // 終盤チャート：人口(緑)と収支(金)を正規化して重ね描き
+  drawEndChart();
+
+  // 采配ハイライト
+  const ranked = INITIATIVES
+    .map(it=>({...it, cum:state.cumInvest[it.id]}))
+    .filter(it=>it.cum>0)
+    .sort((a,b)=>b.cum-a.cum)
+    .slice(0,5);
+  const list = document.getElementById('highlightList');
+  list.innerHTML = ranked.length
+    ? ranked.map(it=>`<li>${it.icon} ${it.name} <b>${it.cum.toLocaleString()} 万円</b></li>`).join('')
+    : '<li>今回は施策への投資が行われませんでした。</li>';
+
+  loadComments();
+}
+
+function drawEndChart(){
+  const canvas = document.getElementById('chartEnd');
+  const ctx = canvas.getContext('2d');
+  const w = canvas.width, h = canvas.height;
+  ctx.clearRect(0,0,w,h);
+
+  const pops = state.history.map(hh=>hh.population);
+  const fins = state.history.map(hh=>hh.treasury);
+
+  function normDraw(values, color, label, yOffsetLabel){
+    const min=Math.min(...values), max=Math.max(...values), range=(max-min)||1;
+    const stepX = w/(values.length-1);
+    const padY=20;
+    ctx.beginPath();
+    values.forEach((v,i)=>{
+      const x=i*stepX;
+      const y = h-padY-((v-min)/range)*(h-padY*2);
+      if(i===0) ctx.moveTo(x,y); else ctx.lineTo(x,y);
+    });
+    ctx.strokeStyle=color; ctx.lineWidth=2.6; ctx.shadowColor=color; ctx.shadowBlur=9; ctx.stroke();
+    ctx.shadowBlur=0;
+    ctx.fillStyle=color; ctx.font='12px sans-serif';
+    ctx.fillText(label, 8, yOffsetLabel);
+  }
+  ctx.strokeStyle='rgba(201,162,75,0.12)';
+  for(let i=1;i<4;i++){ const y=h/4*i; ctx.beginPath();ctx.moveTo(0,y);ctx.lineTo(w,y);ctx.stroke(); }
+
+  normDraw(pops, '#8FC98F', '● 人口', 16);
+  normDraw(fins, '#E7CE8E', '● 収支', 32);
+}
+
+/* ---------------- 感想コメント（共有ストレージ） ---------------- */
+async function submitComment(){
+  const nameEl = document.getElementById('commentName');
+  const bodyEl = document.getElementById('commentBody');
+  const statusEl = document.getElementById('commentStatus');
+  const name = (nameEl.value||'匿名の参加者').trim().slice(0,20);
+  const body = (bodyEl.value||'').trim().slice(0,300);
+  if(!body){
+    statusEl.textContent = '感想欄が空です。ひとことで大丈夫です。';
+    return;
+  }
+  statusEl.textContent = '投稿中…';
+  const key = `sado-comments:${Date.now()}-${Math.random().toString(36).slice(2,7)}`;
+  const payload = JSON.stringify({name, body, ts:Date.now()});
+  try{
+    const res = await window.storage.set(key, payload, true);
+    if(!res){ statusEl.textContent = '投稿に失敗しました。もう一度お試しください。'; return; }
+    bodyEl.value='';
+    statusEl.textContent = '投稿しました。ありがとうございます！';
+    await loadComments();
+  }catch(err){
+    statusEl.textContent = '投稿に失敗しました（通信エラー）。';
+  }
+}
+
+async function loadComments(){
+  const listEl = document.getElementById('commentList');
+  listEl.innerHTML = '<div class="comment-empty">読み込み中…</div>';
+  try{
+    const listRes = await window.storage.list('sado-comments:', true);
+    const keys = (listRes && listRes.keys) ? listRes.keys : [];
+    if(keys.length===0){
+      listEl.innerHTML = '<div class="comment-empty">まだ感想はありません。最初の一人になりましょう。</div>';
+      return;
+    }
+    const items = [];
+    for(const k of keys.slice(-30)){
+      try{
+        const r = await window.storage.get(k, true);
+        if(r && r.value){
+          const parsed = JSON.parse(r.value);
+          items.push(parsed);
+        }
+      }catch(e){ /* 個別の取得失敗はスキップ */ }
+    }
+    items.sort((a,b)=> (b.ts||0)-(a.ts||0));
+    listEl.innerHTML = items.length
+      ? items.map(it=>{
+          const d = it.ts ? new Date(it.ts) : null;
+          const timeStr = d ? `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}` : '';
+          return `<div class="comment-item"><div class="meta">${escapeHtml(it.name||'匿名の参加者')} ・ ${timeStr}</div><div class="body">${escapeHtml(it.body||'')}</div></div>`;
+        }).join('')
+      : '<div class="comment-empty">まだ感想はありません。最初の一人になりましょう。</div>';
+  }catch(err){
+    listEl.innerHTML = '<div class="comment-empty">感想の読み込みに失敗しました。</div>';
+  }
+}
+
+function escapeHtml(s){
+  return String(s).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+</script>
+</body>
+</html>
